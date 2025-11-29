@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Dashboard — NSGD.acx</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    :root {
+      --sidebar:#04192b;
+      --sidebar-contrast:#08243a;
+      --bg:#f4f6fb;
+      --card:#ffffff;
+      --muted:#6b7280;
+      --primary:#2563eb;
+      --soft-border: rgba(230,238,248,0.9);
+      --shadow: 0 12px 30px rgba(15,23,42,0.08);
+      --radius:14px;
+    }
+
+    *{ box-sizing:border-box;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;}
+    html,body{height:100%;margin:0;background:var(--bg);color:#0f1724}
+
+    .layout{display:flex;min-height:100vh}
+
+    .sidebar{
+      width:230px;background:linear-gradient(180deg,var(--sidebar),var(--sidebar-contrast));
+      color:#e6eef9;padding:20px 16px;position:fixed;top:0;left:0;bottom:0;
+      display:flex;flex-direction:column;justify-content:space-between;
+    }
+    .brand{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+    .brand img{width:44px;height:44px;border-radius:8px;object-fit:cover;background:#fff;padding:4px}
+    .brand .name{font-weight:700;font-size:16px}
+
+    .nav{margin-top:10px;flex:1}
+    .nav-label{color:rgba(255,255,255,0.18);font-size:11px;letter-spacing:0.08em;margin:8px 6px}
+    .nav-item{
+      display:flex;align-items:center;gap:12px;padding:10px;border-radius:12px;color:#eaf2ff;
+      text-decoration:none;margin:6px 4px;transition:all .15s ease;
+    }
+    .nav-item .ico{width:26px;text-align:center;font-size:18px}
+    .nav-item:hover{transform:translateX(4px);background:linear-gradient(90deg,#0e3a6a,#143653)}
+    .nav-item.active{background:linear-gradient(90deg,#1f55c6,#0e3a6a);box-shadow:0 6px 18px rgba(20,45,90,0.12)}
+
+    .main{margin-left:230px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+    .topbar{height:72px;display:flex;flex-direction:column;justify-content:center;padding:20px 28px;border-bottom:1px solid rgba(15,23,42,0.03)}
+    .top-title{font-size:20px;font-weight:700}
+    .top-sub{color:var(--muted);font-size:13px;margin-top:4px}
+
+    .content{padding:22px 28px 40px;flex:1}
+
+    .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:22px}
+    .metric-card{
+      background:white;border-radius:var(--radius);padding:22px;border:1px solid var(--soft-border);
+      box-shadow:var(--shadow);
+    }
+    .metric-title{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em}
+    .metric-value{font-size:22px;font-weight:700;margin-top:6px}
+
+    .row{display:flex;gap:22px;align-items:flex-start}
+    .left-panel{
+      flex:3;background:white;border-radius:var(--radius);padding:20px;
+      border:1px solid var(--soft-border);box-shadow:var(--shadow);
+    }
+    .right-panel{
+      width:280px;background:white;border-radius:var(--radius);padding:20px;
+      border:1px solid var(--soft-border);box-shadow:var(--shadow);
+    }
+
+    table{width:100%;border-collapse:collapse;margin-top:10px}
+    th{font-size:12px;color:var(--muted);text-transform:uppercase;padding:10px;border-bottom:1px solid #e5e7eb;text-align:left}
+    td{padding:12px;border-bottom:1px solid #f0f2f5;font-size:14px}
+
+    .green{color:#0ea45a;font-weight:600}
+    .summary-line{display:flex;justify-content:space-between;margin:8px 0;font-size:14px}
+  </style>
+</head>
+
+<body>
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div>
+      <div class="brand">
+        <img src="assets/logo.png" />
+        <div class="name">NSGD.acx</div>
+      </div>
+
+      <nav class="nav">
+        <div class="nav-label">Main</div>
+
+        <a href="dashboard.html" class="nav-item active">
+          <span class="ico">📊</span>Dashboard
+        </a>
+
+        <a href="entry.html" class="nav-item">
+          <span class="ico">➕</span>Add Entry
+        </a>
+
+        <a href="ledger.html" class="nav-item">
+          <span class="ico">📒</span>Ledger
+        </a>
+
+        <a href="expenses.html" class="nav-item">
+          <span class="ico">💰</span>Personal Expenses
+        </a>
+
+        <a href="analysis.html" class="nav-item">
+          <span class="ico">📈</span>Analytics
+        </a>
+      </nav>
+    </div>
+
+    <!-- ✅ LOGOUT BUTTON ADDED HERE -->
+    <div>
+      <a href="login.html" class="nav-item" onclick="localStorage.removeItem('token')">
+        <span class="ico">🚪</span>Logout
+      </a>
+      <div class="sidebar-footer">NSGD.acx • Internal Tool</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <header class="topbar">
+      <div class="top-title">Dashboard</div>
+      <div class="top-sub">Quick overview of today’s business</div>
+    </header>
+
+    <div class="content">
+
+      <div class="metrics">
+        <div class="metric-card"><div class="metric-title">Total Amount</div><div class="metric-value" id="m_amount">₹0</div></div>
+        <div class="metric-card"><div class="metric-title">Total Paid</div><div class="metric-value green" id="m_paid">₹0</div></div>
+        <div class="metric-card"><div class="metric-title">Total Due</div><div class="metric-value" id="m_due">₹0</div></div>
+        <div class="metric-card"><div class="metric-title">Net Profit</div><div class="metric-value" id="m_profit">₹0</div></div>
+      </div>
+
+      <div class="row">
+
+        <div class="left-panel">
+          <h3 style="margin:0 0 6px;font-weight:700;">Recent Entries</h3>
+          <div style="color:var(--muted);font-size:13px;margin-bottom:10px;">Latest 5 customers added to ledger</div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th><th>Customer</th><th>UID</th><th>Paid</th><th>Due</th>
+              </tr>
+            </thead>
+            <tbody id="recentBody">
+              <tr><td colspan="5" style="padding:15px;color:#9ca3af">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="right-panel">
+          <div style="font-size:18px;font-weight:700;margin-bottom:4px;">Today’s Snapshot</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:14px;">Overall financial summary</div>
+
+          <div class="snap">
+            <div class="summary-line"><span>Total Entries</span><span id="s_count">0</span></div>
+            <div class="summary-line"><span>Amount</span><span id="s_amount">₹0</span></div>
+            <div class="summary-line"><span>Paid</span><span id="s_paid">₹0</span></div>
+            <div class="summary-line"><span>Due</span><span id="s_due">₹0</span></div>
+            <div class="summary-line"><span>Expense</span><span id="s_exp">₹0</span></div>
+            <div class="summary-line"><span>Net Profit</span><span class="green" id="s_profit">₹0</span></div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+</div>
+
+<script>
+const API = "https://nsgd-backend.onrender.com";
+
+
+function auth(){
+  let t = localStorage.getItem("token") || "";
+  if (!t.startsWith("Bearer ")) t = "Bearer " + t;
+
+  return {
+    "Authorization": t,
+    "Content-Type": "application/json"
+  };
+}
+
+function fmt(n){ return "₹" + Number(n || 0); }
+
+async function load(){
+  try {
+    const res = await fetch(API + "/api/get-entries", { headers: auth() });
+    let data = await res.json();
+    if (!Array.isArray(data)) data = [];
+
+    let amount=0, paid=0, due=0, exp=0;
+
+    data.forEach(e=>{
+      const amt = Number(e.amount||0);
+      const p = (e.payments||[]).reduce((a,b)=>a+Number(b.paid||0),0);
+      const x = (e.payments||[]).reduce((a,b)=>a+Number(b.expenditure||0),0);
+
+      amount += amt;
+      paid += p;
+      exp += x;
+      due += amt - p;
+    });
+
+    m_amount.innerText = fmt(amount);
+    m_paid.innerText = fmt(paid);
+    m_due.innerText = fmt(due);
+    m_profit.innerText = fmt(paid - exp);
+
+    s_count.innerText = data.length;
+    s_amount.innerText = fmt(amount);
+    s_paid.innerText = fmt(paid);
+    s_due.innerText = fmt(due);
+    s_exp.innerText = fmt(exp);
+    s_profit.innerText = fmt(paid - exp);
+
+    const recent = data.slice(-5).reverse();
+    const body = document.getElementById("recentBody");
+    body.innerHTML = "";
+
+    recent.forEach(e=>{
+      const p = (e.payments||[]).reduce((a,b)=>a+Number(b.paid||0),0);
+      const d = Number(e.amount||0) - p;
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${e.date||"--"}</td>
+        <td>${e.name||"Unnamed"}</td>
+        <td>${e.uniqueID||"--"}</td>
+        <td>${fmt(p)}</td>
+        <td>${fmt(d)}</td>
+      `;
+      body.appendChild(tr);
+    });
+
+  } catch (err) {
+    console.error("Dashboard Error:", err);
+  }
+}
+
+load();
+</script>
+
+</body>
+</html>

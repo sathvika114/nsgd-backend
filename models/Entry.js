@@ -9,6 +9,7 @@ const PaymentSchema = new mongoose.Schema({
 
 const EntrySchema = new mongoose.Schema({
   date: String,
+
   uniqueID: { type: String, required: true },
   name: String,
   contact: String,

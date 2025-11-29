@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Ledger — NSGD.acx</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root{
+      --bg:#f6f8fb;
+      --card:#ffffff;
+      --muted:#6b7280;
+      --primary:#0f4ea6;
+      --soft-border:#e6eef8;
+      --radius:10px;
+      --shadow: 0 10px 30px rgba(12,20,40,0.06);
+    }
+    *{box-sizing:border-box;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;}
+    body{margin:0;background:var(--bg);color:#071126}
+    .wrap{max-width:1150px;margin:28px auto;padding:18px;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow)}
+    header.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+    .brand {display:flex;align-items:center;gap:12px}
+    .brand img{width:56px;height:56px;object-fit:contain;border-radius:8px}
+    .title {font-size:20px;font-weight:700;color:var(--primary)}
+    .subtitle{font-size:13px;color:var(--muted)}
+    .actions {display:flex;gap:8px;align-items:center}
+    .btn{padding:8px 12px;border-radius:8px;border:0;cursor:pointer;font-weight:600}
+    .btn.primary{background:linear-gradient(90deg,#2563eb,#0f4ea6);color:#fff}
+    .btn.ghost{background:#f5f7fb;border:1px solid var(--soft-border);color:#071126}
+    .search-wrap{margin-top:10px;display:flex;gap:12px;align-items:center}
+    .search{padding:8px 12px;border-radius:999px;border:1px solid var(--soft-border);background:#fbfdff;min-width:320px}
+    .search input{border:0;outline:0;background:transparent;width:100%;font-size:14px}
+    table{width:100%;border-collapse:collapse;margin-top:14px;font-size:14px}
+    thead th{padding:10px;text-align:left;font-size:12px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--soft-border)}
+    tbody td{padding:10px;border-bottom:1px solid #f3f6fb;vertical-align:middle}
+    tbody tr:nth-child(even) td{background:#fbfdff}
+    .right {text-align:right}
+    .small-pill{display:inline-block;padding:6px 8px;border-radius:8px;background:#f7fbff;border:1px solid var(--soft-border);font-size:13px}
+    .actions-cell button{margin-left:6px}
+
+    /* Modal */
+    .modal-bg {display:none;position:fixed;inset:0;background:rgba(6,10,18,0.45);align-items:center;justify-content:center;z-index:9999}
+    .modal {width:560px;max-width:96%;background:var(--card);padding:16px;border-radius:12px;box-shadow:0 20px 50px rgba(12,20,40,0.18)}
+    .modal h3{margin:0 0 6px 0;color:var(--primary)}
+    .modal .sub{color:var(--muted);font-size:13px;margin-bottom:8px}
+    .hist-list{max-height:300px;overflow:auto;margin-top:8px;border-radius:8px;border:1px solid var(--soft-border)}
+    .hist-row{display:flex;gap:8px;padding:10px;border-bottom:1px solid #f3f6fb;align-items:center}
+    .hist-row div{font-size:14px}
+    .pill{padding:4px 10px;background:#eaf2ff;border-radius:20px;font-size:12px;border:1px solid #d5e4ff;color:#0f4ea6;font-weight:600;white-space:nowrap}
+    .form-inline{display:flex;gap:8px;margin-top:10px;align-items:center}
+    .form-inline input{padding:8px;border-radius:8px;border:1px solid var(--soft-border);width:100%}
+    .note{color:#6b7280;font-size:13px;margin-top:8px}
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <img src="/assets/logo.png">
+      <div>
+        <div class="title">NSGD.acx — Ledger</div>
+        <div class="subtitle">View, edit and manage customer payment histories</div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn ghost" onclick="window.location.href='dashboard.html'">← Dashboard</button>
+      <button class="btn primary" onclick="window.location.href='entry.html'">➕ Add Entry</button>
+      <button class="btn ghost" onclick="exportExcel()">📤 Export Excel</button>
+    </div>
+  </header>
+
+  <div class="search-wrap">
+    <div class="search"><input id="searchBox" placeholder="Search by UID / customer / agent / date..." oninput="searchTable()"></div>
+    <div class="small-pill" id="countBadge">0 entries</div>
+  </div>
+
+  <table id="ledgerTable">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>UID</th>
+        <th>Customer</th>
+        <th>Contact</th>
+        <th>Agent</th>
+        <th class="right">Amount</th>
+        <th class="right">Paid</th>
+        <th class="right">Due</th>
+        <th class="right">Expense</th>
+        <th class="right">Profit</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<!-- MODAL -->
+<div id="modalBg" class="modal-bg">
+  <div class="modal">
+    <h3 id="modalTitle">Payment History</h3>
+    <div id="modalSub" class="sub"></div>
+    <div class="hist-list" id="histList"></div>
+
+    <div id="editArea" style="display:none">
+      <label style="font-size:13px;color:var(--muted)">Edit selected payment</label>
+      <div class="form-inline">
+        <input id="editDate" placeholder="DD/MM/YYYY">
+        <input id="editPaid" type="number" placeholder="Paid">
+        <input id="editExp" type="number" placeholder="Expense">
+        <button class="btn primary" onclick="saveEdited()">Save</button>
+        <button class="btn ghost" onclick="cancelEdit()">Cancel</button>
+      </div>
+      <div class="note">If date left empty → today's date used.</div>
+    </div>
+
+    <hr>
+
+    <label style="font-size:13px;color:var(--muted)">Add new payment</label>
+    <div class="form-inline">
+      <input id="newDate" placeholder="DD/MM/YYYY">
+      <input id="newPaid" type="number" placeholder="Paid">
+      <input id="newExp" type="number" placeholder="Expense">
+      <select id="newMode" style="padding:8px;border-radius:8px;border:1px solid var(--soft-border);width:140px">
+        <option>Cash</option>
+        <option>PhonePe</option>
+        <option>GooglePay</option>
+        <option>Bank Transfer</option>
+      </select>
+      <button class="btn primary" onclick="addPayment()">Add</button>
+    </div>
+
+    <div style="text-align:right;margin-top:12px">
+      <button class="btn ghost" onclick="closeModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = "https://nsgd-backend.onrender.com";
+
+function authHeader() {
+  let t = localStorage.getItem("token");
+  if (!t.startsWith("Bearer ")) t = "Bearer " + t;
+  return {
+    "Authorization": t,
+    "Content-Type": "application/json"
+  };
+}
+
+
+let ledgerData = [];
+let activeUid = null;
+let editingIndex = null;
+
+function loadLedger() {
+  fetch(`${API}/api/get-entries`, { headers: authHeader() })
+    .then(r => r.json())
+    .then(data => { ledgerData = data || []; renderTable(); });
+}
+
+function renderTable() {
+  const tbody = document.querySelector("#ledgerTable tbody");
+  tbody.innerHTML = "";
+
+  ledgerData.forEach(e => {
+    const due = e.amount - e.paid;
+    const profit = e.paid - e.expenditure;
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${e.date}</td>
+      <td>${e.uniqueID}</td>
+      <td>${e.name}</td>
+      <td>${e.contact}</td>
+      <td>${e.agent}</td>
+      <td class="right">₹${e.amount}</td>
+      <td class="right">₹${e.paid}</td>
+      <td class="right">₹${due}</td>
+      <td class="right">₹${e.expenditure}</td>
+      <td class="right">₹${profit}</td>
+      <td class="actions-cell">
+        <button class="btn ghost" onclick="openHistory('${e.uniqueID}')">📑</button>
+        <button class="btn ghost" onclick="editEntry('${e.uniqueID}')">✏️</button>
+        <button class="btn ghost" onclick="openProfile('${e.uniqueID}')">👤</button>
+        <button class="btn ghost" style="background:#ffecec;color:#c53030" onclick="deleteEntry('${e.uniqueID}')">❌</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById("countBadge").innerText =
+    ledgerData.length + (ledgerData.length === 1 ? " entry" : " entries");
+}
+
+function openHistory(uid) {
+  activeUid = uid;
+  editingIndex = null;
+
+  const entry = ledgerData.find(x => x.uniqueID === uid);
+  if (!entry) return;
+
+  document.getElementById("modalTitle").innerText = `Payment History — ${entry.uniqueID}`;
+  document.getElementById("modalSub").innerText =
+    `Customer: ${entry.name} • Contact: ${entry.contact} • Agent: ${entry.agent}`;
+
+  renderHistoryList(entry);
+  document.getElementById("modalBg").style.display = "flex";
+}
+
+function closeModal() {
+  document.getElementById("modalBg").style.display = "none";
+}
+
+function renderHistoryList(entry) {
+  const list = document.getElementById("histList");
+  list.innerHTML = "";
+
+  if (!entry.payments || entry.payments.length === 0) {
+    list.innerHTML = `<div style="padding:12px;color:#888">No payments yet.</div>`;
+    return;
+  }
+
+  entry.payments.forEach((p, i) => {
+    const div = document.createElement("div");
+    div.className = "hist-row";
+
+    div.innerHTML = `
+      <div style="width:90px">${p.date}</div>
+      <div style="width:70px" class="right">₹${p.paid}</div>
+      <div style="width:70px" class="right">₹${p.expenditure}</div>
+      <div style="flex:1"><span class="pill">${p.mode || "Cash"}</span></div>
+      <div style="width:160px;text-align:right">
+        <button class="btn ghost" onclick="startEdit(${i})">✏️</button>
+        <button class="btn ghost" style="background:#ffecec;color:#c53030" onclick="deletePayment(${i})">❌</button>
+      </div>
+    `;
+
+    list.appendChild(div);
+  });
+}
+
+function addPayment() {
+  const entry = ledgerData.find(x => x.uniqueID === activeUid);
+
+  const d = document.getElementById("newDate").value || new Date().toLocaleDateString("en-GB");
+  const paid = Number(document.getElementById("newPaid").value) || 0;
+  const exp = Number(document.getElementById("newExp").value) || 0;
+  const mode = document.getElementById("newMode").value;
+
+  entry.payments.push({
+    date: d,
+    paid,
+    expenditure: exp,
+    mode
+  });
+
+  savePayments(entry);
+}
+
+function startEdit(i) {
+  editingIndex = i;
+  const entry = ledgerData.find(x => x.uniqueID === activeUid);
+  const p = entry.payments[i];
+
+  document.getElementById("editArea").style.display = "block";
+  document.getElementById("editDate").value = p.date;
+  document.getElementById("editPaid").value = p.paid;
+  document.getElementById("editExp").value = p.expenditure;
+}
+
+function saveEdited() {
+  const entry = ledgerData.find(x => x.uniqueID === activeUid);
+  const p = entry.payments[editingIndex];
+
+  p.date = document.getElementById("editDate").value || p.date;
+  p.paid = Number(document.getElementById("editPaid").value) || 0;
+  p.expenditure = Number(document.getElementById("editExp").value) || 0;
+
+  savePayments(entry);
+}
+
+function deletePayment(i) {
+  const entry = ledgerData.find(x => x.uniqueID === activeUid);
+  entry.payments.splice(i, 1);
+  savePayments(entry);
+}
+
+function savePayments(entry) {
+  fetch(`${API}/api/update-history`, {
+    method: "POST",
+    headers: authHeader(),
+    body: JSON.stringify({ uniqueID: entry.uniqueID, payments: entry.payments })
+  })
+  .then(r => r.json())
+  .then(res => {
+    if (res.success) {
+      loadLedger();
+      openHistory(entry.uniqueID);
+    }
+  });
+}
+
+function editEntry(uid) {
+  window.location.href = `entry.html?uid=${uid}`;
+}
+
+function openProfile(uid) {
+  window.location.href = `customer.html?uid=${uid}`;
+}
+
+function deleteEntry(uid) {
+  if (!confirm("Delete this entry?")) return;
+
+  fetch(`${API}/api/delete-entry/${uid}`, {
+    method: "DELETE",
+    headers: authHeader()
+  })
+  .then(() => loadLedger());
+}
+
+function exportExcel() {
+  fetch(`${API}/api/export-excel`, { headers: authHeader() })
+    .then(r => r.blob())
+    .then(blob => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "ledger.xlsx";
+      a.click();
+    });
+}
+
+loadLedger();
+</script>
+
+</body>
+</html>

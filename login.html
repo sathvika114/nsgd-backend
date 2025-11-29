@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NSGD.acx — Login</title>
+<script src="https://unpkg.com/lucide@latest"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+:root {
+  --bg: #f0f4ff;
+  --card: #ffffff;
+  --text: #0b1220;
+  --muted: #6b7280;
+  --primary: #003b73;
+  --primary-dark: #012f55;
+  --radius: 20px;
+  --shadow: 0 25px 60px rgba(0,0,0,0.10);
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  font-family: Inter, Arial, sans-serif;
+  color: var(--text);
+}
+
+.container {
+  display: flex;
+  height: 100vh;
+}
+
+.left {
+  flex: 1.2;
+  background: linear-gradient(180deg, #003b73, #001a36);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 40px;
+}
+
+.left img {
+  width: 150px;
+  margin-bottom: 20px;
+}
+
+.left h1 {
+  font-size: 30px;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.left p {
+  font-size: 15px;
+  opacity: .9;
+  max-width: 300px;
+}
+
+.right {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+}
+
+.login-box {
+  width: 420px;
+  max-width: 95%;
+  background: var(--card);
+  padding: 40px 32px 32px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+h2 {
+  text-align: left;
+  margin-bottom: 22px;
+  font-weight: 700;
+}
+
+.field {
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+  outline: none;
+}
+
+.password-wrapper {
+  position: relative;
+}
+
+.password-wrapper i {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(90deg, #2563eb, #003b73);
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: .2s;
+}
+button:hover { opacity: .9; }
+
+.toggle {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  cursor: pointer;
+  font-size: 26px;
+  color: var(--text);
+}
+
+@media (max-width: 900px) {
+  .left { display: none; }
+  .right { flex: 1; }
+}
+</style>
+</head>
+<body>
+
+<div class="toggle" onclick="toggleDark()">
+  <i data-lucide="moon"></i>
+</div>
+
+<div class="container">
+
+  <div class="left">
+    <img src="assets/logo.png" />
+    <h1>Welcome to NSGD.acx</h1>
+    <p>A secure internal ledger & business management system for NSGD</p>
+  </div>
+
+  <div class="right">
+    <div class="login-box">
+      <h2>Login</h2>
+
+      <div class="field">
+        <input type="text" id="username" placeholder="Enter Username">
+      </div>
+
+      <div class="field password-wrapper">
+        <input type="password" id="password" placeholder="Enter Password">
+        <i data-lucide="eye" id="eyeIcon" onclick="togglePassword()"></i>
+      </div>
+
+      <button id="loginBtn" onclick="login()">Login</button>
+
+      <div id="info" style="margin-top:10px; font-size:12px; color:var(--muted); text-align:center;">
+        Enter your credentials to continue.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+lucide.createIcons();
+
+/* Password Toggle */
+function togglePassword() {
+  const input = document.getElementById("password");
+  const icon = document.getElementById("eyeIcon");
+
+  if (input.type === "password") {
+    input.type = "text";
+    icon.setAttribute("data-lucide", "eye-off");
+  } else {
+    input.type = "password";
+    icon.setAttribute("data-lucide", "eye");
+  }
+  lucide.createIcons();
+}
+
+/* BACKEND URL */
+const API = "https://nsgd-backend.onrender.com";
+
+
+/* Login API */
+async function login() {
+  const u = document.getElementById("username").value.trim();
+  const p = document.getElementById("password").value.trim();
+  const btn = document.getElementById("loginBtn");
+
+  if (!u || !p) {
+    alert("Please enter both fields.");
+    return;
+  }
+
+  btn.innerText = "Logging in...";
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(`${BASE}/auth/login`, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ username: u, password: p })
+    });
+
+    const data = await res.json();
+
+    if (!data.success) {
+      alert(data.msg);
+      btn.innerText = "Login";
+      btn.disabled = false;
+      return;
+    }
+
+    localStorage.setItem("token", "Bearer " + data.token);
+    window.location.href = "dashboard.html";
+
+  } catch (e) {
+    alert("Unable to connect to server.");
+    btn.innerText = "Login";
+    btn.disabled = false;
+  }
+}
+
+/* Dark mode toggle */
+function toggleDark() {
+  document.body.classList.toggle("dark");
+  lucide.createIcons();
+}
+</script>
+
+</body>
+</html>
+

@@ -1,0 +1,185 @@
+[
+  {
+    "date": "27/11/2025",
+    "uniqueID": "NSGD-57885",
+    "name": "Sathvika ",
+    "contact": "8555868778",
+    "agent": "Sanjeev",
+    "agentPhone": "9989266782",
+    "amount": 1000,
+    "paid": 1000,
+    "expenditure": 500,
+    "due": 0,
+    "balance": 500,
+    "payments": [
+      {
+        "date": "27/11/2025",
+        "paid": 1000,
+        "expenditure": 500
+      }
+    ]
+<<<<<<< HEAD
+  },
+  {
+    "date": "27/11/2025",
+    "uniqueID": "NSGD-61689",
+    "contact": "8555868778",
+    "agent": "",
+    "agentPhone": "",
+    "amount": 2000,
+    "paid": 1200,
+    "expenditure": 1000,
+    "due": 800,
+    "balance": 200,
+    "payments": [
+      {
+        "date": "27/11/2025",
+        "paid": 1200,
+        "expenditure": 1000,
+        "mode": "Cash"
+      }
+    ]
+  },
+  {
+    "date": "27/11/2025",
+    "uniqueID": "NSGD-54674",
+    "name": "",
+    "contact": "",
+    "agent": "",
+    "agentPhone": "",
+    "amount": 0,
+    "paid": 0,
+    "expenditure": 0,
+    "due": 0,
+    "balance": 0,
+    "payments": []
+  },
+  {
+    "date": "27/11/2025",
+    "uniqueID": "NSGD-49566",
+    "name": "Sathvika ",
+    "contact": "8555868778",
+    "agent": "",
+    "agentPhone": "",
+    "amount": 2000,
+    "paid": 1200,
+    "expenditure": 1000,
+    "due": 800,
+    "balance": 200,
+    "payments": [
+      {
+        "date": "27/11/2025",
+        "paid": 1200,
+        "expenditure": 1000,
+        "paymentMode": "PhonePe"
+      }
+    ]
+  },
+  {
+    "date": "27/11/2025",
+    "uniqueID": "NSGD-41438",
+    "name": "Sathvika ",
+    "contact": "8555868778",
+    "agent": "",
+    "agentPhone": "",
+    "amount": 10,
+    "paid": 10,
+    "expenditure": 5,
+    "due": 0,
+    "balance": 5,
+    "payments": [
+      {
+        "date": "27/11/2025",
+        "paid": 10,
+        "expenditure": 5,
+        "mode": "CASH"
+      }
+    ]
+  },
+  {
+    "date": "27/11/2025",
+    "uniqueID": "NSGD-76052",
+    "name": "Sathvika ",
+    "contact": "8555868778",
+    "agent": "",
+    "agentPhone": "",
+    "amount": 10,
+    "paid": 10,
+    "expenditure": 5,
+    "due": 0,
+    "balance": 5,
+    "payments": [
+      {
+        "date": "27/11/2025",
+        "paid": 10,
+        "expenditure": 5,
+        "mode": "Cash"
+      }
+    ]
+  },
+  {
+    "date": "27/11/2025",
+    "uniqueID": "NSGD-25354",
+    "name": "Sathvika ",
+    "contact": "8555868778",
+    "agent": "",
+    "agentPhone": "",
+    "amount": 100,
+    "paid": 100,
+    "expenditure": 50,
+    "due": 0,
+    "balance": 50,
+    "payments": [
+      {
+        "date": "27/11/2025",
+        "paid": 100,
+        "expenditure": 50,
+        "mode": "Cash"
+      }
+    ]
+  },
+  {
+    "date": "27/11/2025",
+    "uniqueID": "NSGD-90754",
+    "name": "Sathvika ",
+    "contact": "8555868778",
+    "agent": "",
+    "agentPhone": "",
+    "amount": 100,
+    "paid": 100,
+    "expenditure": 50,
+    "due": 0,
+    "balance": 50,
+    "payments": [
+      {
+        "date": "27/11/2025",
+        "paid": 100,
+        "expenditure": 50,
+        "mode": "Cash"
+      }
+    ]
+  },
+  {
+    "date": "27/11/2025",
+    "uniqueID": "NSGD-15963",
+    "name": "",
+    "contact": "8555868778",
+    "agent": "",
+    "agentPhone": "",
+    "amount": 100,
+    "paid": 100,
+    "expenditure": 50,
+    "due": 0,
+    "balance": 50,
+    "payments": [
+      {
+        "date": "27/11/2025",
+        "paid": 100,
+        "expenditure": 50,
+        "mode": "Cash"
+      }
+    ]
+=======
+>>>>>>> 1d88c350c94cc1a08709536cb4c0ff6a6b2abbac
+  }
+]

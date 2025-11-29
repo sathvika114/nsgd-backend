@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Personal Expenses — NSGD.acx</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root{
+      --sidebar:#04192b;
+      --sidebar-contrast:#08243a;
+      --bg:#f4f6fb;
+      --card:#ffffff;
+      --muted:#6b7280;
+      --primary:#2563eb;
+      --soft-border:#e6eef8;
+      --shadow:0 12px 30px rgba(15,23,42,0.06);
+      --radius:14px;
+    }
+    *{box-sizing:border-box;font-family:Inter, system-ui, sans-serif;}
+    body{margin:0;background:var(--bg);color:#0f172a;}
+
+    .layout{display:flex;min-height:100vh}
+
+    /* -------- SIDEBAR -------- */
+    .sidebar{
+      width:230px;
+      background:linear-gradient(180deg,var(--sidebar),var(--sidebar-contrast));
+      color:#e6eef9;
+      padding:20px 16px;
+      position:fixed;top:0;left:0;bottom:0;
+      display:flex;flex-direction:column;justify-content:space-between;
+    }
+    .brand{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+    .brand img{width:44px;height:44px;border-radius:8px;object-fit:cover;background:#fff;padding:4px}
+    .brand .name{font-weight:700;font-size:16px}
+
+    .nav-label{color:rgba(255,255,255,0.18);font-size:11px;letter-spacing:0.08em;margin:8px 6px}
+    .nav-item{
+      display:flex;align-items:center;gap:12px;padding:10px;border-radius:12px;
+      color:#eaf2ff;text-decoration:none;margin:6px 4px;transition:all .15s ease
+    }
+    .nav-item.active{
+      background:linear-gradient(90deg,#1f55c6,#0e3a6a);
+      box-shadow:0 6px 18px rgba(20,45,90,0.12)
+    }
+
+    /* -------- MAIN CONTENT -------- */
+    .main{margin-left:230px;flex:1;display:flex;flex-direction:column}
+    .top{height:72px;display:flex;align-items:center;padding:20px 28px;border-bottom:1px solid rgba(15,23,42,0.03)}
+    .title{font-size:20px;font-weight:700}
+    .sub{color:var(--muted);font-size:13px;margin-top:4px}
+
+    .content{padding:22px 28px 40px}
+
+    .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px}
+    .card{background:var(--card);padding:18px;border-radius:var(--radius);box-shadow:var(--shadow)}
+
+    .input-row{display:flex;gap:12px;margin-bottom:14px}
+    input{padding:10px;border-radius:10px;border:1px solid var(--soft-border);width:100%}
+
+    .save-btn{
+      background:var(--primary);color:#fff;border:0;padding:10px 16px;border-radius:999px;
+      cursor:pointer;font-weight:700
+    }
+
+    table{width:100%;border-collapse:collapse;margin-top:14px;font-size:14px}
+    thead th{padding:10px;text-align:left;font-size:12px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--soft-border)}
+    tbody td{padding:10px;border-bottom:1px solid #f3f6fb}
+
+    .edit-btn,.del-btn{
+      padding:6px;border-radius:6px;cursor:pointer;border:1px solid var(--soft-border);background:#fff;
+    }
+  </style>
+</head>
+
+<body>
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div>
+      <div class="brand">
+        <img src="assets/logo.png">
+        <div class="name">NSGD.acx</div>
+      </div>
+
+      <div class="nav-label">Main</div>
+      <a href="dashboard.html" class="nav-item">🏠 Dashboard</a>
+      <a href="entry.html" class="nav-item">➕ Add Entry</a>
+      <a href="ledger.html" class="nav-item">📒 Ledger</a>
+      <a href="expenses.html" class="nav-item active">💰 Personal Expenses</a>
+      <a href="analysis.html" class="nav-item">📊 Analytics</a>
+
+      <div class="nav-label">Account</div>
+      <a href="login.html" id="logoutLink" class="nav-item">🚪 Logout</a>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+    <div class="top">
+      <div>
+        <div class="title">Personal Expenses</div>
+        <div class="sub">Manage your monthly spending</div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- TOP CARDS -->
+      <div class="cards">
+        <div class="card">
+          <div class="sub">Total Expenses (All Time)</div>
+          <h2 id="allTime">₹0</h2>
+        </div>
+
+        <div class="card">
+          <div class="sub">This Month</div>
+          <h2 id="thisMonth">₹0</h2>
+        </div>
+
+        <div class="card">
+          <div class="sub">Today</div>
+          <h2 id="today">₹0</h2>
+        </div>
+      </div>
+
+      <!-- INPUTS -->
+      <div class="card">
+        <div class="input-row">
+          <input id="dateInput">
+          <input id="descInput" placeholder="Description">
+          <input id="amountInput" placeholder="Amount" type="number">
+          <button class="save-btn" onclick="saveExp()">Save</button>
+        </div>
+      </div>
+
+      <!-- TABLE -->
+      <div class="card">
+        <h3 style="margin:0 0 10px 0;">Expense Records</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Description</th>
+              <th>Amount</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="expBody"></tbody>
+        </table>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+const API = "https://nsgd-backend.onrender.com";
+
+
+function authHeader() {
+  let t = localStorage.getItem("token");
+  if (!t.startsWith("Bearer ")) t = "Bearer " + t;
+  return {
+    "Authorization": t,
+    "Content-Type": "application/json"
+  };
+}
+
+
+function todayStr(){
+  const d = new Date();
+  return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+}
+
+document.getElementById("dateInput").value = todayStr();
+
+let expList = [];
+
+/* LOAD */
+function loadExp(){
+  fetch(`${API}/api/get-expenses`,{headers:authHeader()})
+  .then(r=>r.json())
+  .then(data=>{
+    expList = data || [];
+    render();
+  });
+}
+
+/* SAVE */
+function saveExp(){
+  const entry = {
+    date: document.getElementById("dateInput").value,
+    description: document.getElementById("descInput").value,
+    amount: Number(document.getElementById("amountInput").value||0)
+  };
+
+  if(!entry.amount){
+    alert("Enter amount");
+    return;
+  }
+
+  fetch(`${API}/api/save-expense`,{
+    method:"POST",
+    headers:authHeader(),
+    body:JSON.stringify(entry)
+  })
+  .then(r=>r.json())
+  .then(()=>{
+    loadExp();
+    document.getElementById("descInput").value="";
+    document.getElementById("amountInput").value="";
+  });
+}
+
+/* DELETE */
+function delExp(id){
+  if(!confirm("Delete?")) return;
+
+  fetch(`${API}/api/delete-expense/${id}`,{
+    method:"DELETE",
+    headers:authHeader()
+  })
+  .then(()=>loadExp());
+}
+
+/* RENDER */
+function render(){
+  const body = document.getElementById("expBody");
+  body.innerHTML = "";
+
+  let all = 0, month = 0, todayAmt=0;
+  const td = todayStr();
+  const m = new Date().getMonth()+1;
+
+  expList.forEach(e=>{
+    all += e.amount;
+    if(e.date.endsWith(`/${m}/2025`)) month+=e.amount;
+    if(e.date===td) todayAmt+=e.amount;
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${e.date}</td>
+      <td>${e.description || "—"}</td>
+      <td>₹${e.amount}</td>
+      <td>
+        <button class="edit-btn">✏️</button>
+        <button class="del-btn" onclick="delExp('${e._id}')">🗑️</button>
+      </td>
+    `;
+    body.appendChild(tr);
+  });
+
+  document.getElementById("allTime").innerText="₹"+all;
+  document.getElementById("thisMonth").innerText="₹"+month;
+  document.getElementById("today").innerText="₹"+todayAmt;
+}
+
+loadExp();
+</script>
+
+</body>
+</html>

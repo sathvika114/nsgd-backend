@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Customer Profile - NSGD.acx</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root{
+      --primary:#0f4ea6;
+      --accent:#28a745;
+      --muted:#6b7280;
+      --bg:#f4f6fb;
+      --card:#ffffff;
+      --soft-border:#e6eef8;
+      --radius:12px;
+      --shadow: 0 12px 30px rgba(15,23,42,0.06);
+    }
+    *{box-sizing:border-box;font-family:Inter, system-ui, -apple-system}
+    body{margin:0;background:var(--bg);color:#0b1220}
+    .container{max-width:980px;margin:24px auto;padding:18px;}
+
+    h1{margin:0;font-size:20px;color:var(--primary)}
+    .sub{color:var(--muted);font-size:13px}
+
+    .card{
+      background:var(--card);
+      padding:14px;
+      border-radius:12px;
+      border:1px solid var(--soft-border);
+      box-shadow:var(--shadow);
+      margin-bottom:12px
+    }
+
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .label{font-size:12px;color:var(--muted);margin-bottom:6px}
+    .value{font-weight:700;font-size:15px}
+
+    .btn{
+      padding:8px 12px;border-radius:8px;border:0;cursor:pointer;font-weight:600
+    }
+    .btn-primary{background:var(--primary);color:#fff}
+    .btn-ghost{background:#f6f9ff;border:1px solid var(--soft-border)}
+
+    table{width:100%;border-collapse:collapse;margin-top:10px}
+    th,td{padding:8px;text-align:left}
+    th{color:var(--muted);font-size:13px}
+    tr:nth-child(even){background:#fafcff}
+
+    .small{padding:6px 8px;border-radius:8px;background:#f6f9ff;border:1px solid var(--soft-border);font-size:13px}
+
+    .file-row{display:flex;gap:10px;padding:8px;border-radius:8px;border:1px solid #eef3fb;background:#fff;margin-bottom:6px}
+    .file-thumb{width:56px;height:40px;border-radius:6px;object-fit:cover;border:1px solid #f0f4fb}
+
+    .modal-bg{display:none;position:fixed;inset:0;background:rgba(6,10,18,0.5);align-items:center;justify-content:center;z-index:9999}
+    .modal{width:820px;max-width:96%;background:#fff;border-radius:10px;padding:12px;border:1px solid #e6eef8;box-shadow:0 20px 40px rgba(12,20,40,0.2)}
+
+    @media(max-width:880px){
+      .grid2{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+
+<body>
+<div class="container">
+
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div>
+      <h1>Customer Profile</h1>
+      <div class="sub">Payments, files & notes — organized per customer</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-ghost" onclick="history.back()">← Back</button>
+      <button class="btn btn-primary" id="waShareBtn">Share WhatsApp</button>
+    </div>
+  </div>
+
+  <!-- DETAILS -->
+  <div class="card grid2">
+    <div>
+      <div class="label">Customer Name</div>
+      <div class="value" id="custName">—</div>
+
+      <div class="label" style="margin-top:14px">Customer Contact</div>
+      <div class="value" id="custPhone">—</div>
+    </div>
+
+    <div>
+      <div class="label">Agent Name</div>
+      <div class="value" id="agentName">—</div>
+
+      <div class="label" style="margin-top:14px">Agent Contact</div>
+      <div class="value" id="agentPhone">—</div>
+    </div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div class="card grid2">
+    <div>
+      <div class="label">Total Amount</div>
+      <div class="value" id="sumAmount">₹0</div>
+    </div>
+    <div>
+      <div class="label">Total Paid</div>
+      <div class="value" id="sumPaid">₹0</div>
+    </div>
+    <div>
+      <div class="label">Remaining Due</div>
+      <div class="value" id="sumDue">₹0</div>
+    </div>
+    <div>
+      <div class="label">Total Expense</div>
+      <div class="value" id="sumExp">₹0</div>
+    </div>
+  </div>
+
+  <!-- PAYMENT HISTORY -->
+  <div class="card">
+    <h3 style="margin-top:0">Payment History</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Paid</th>
+          <th>Expense</th>
+          <th>Mode</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="payBody"></tbody>
+    </table>
+
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+      <input id="newDate" placeholder="DD/MM/YYYY (empty → today)" class="small">
+      <input id="newPaid" type="number" placeholder="Paid" class="small" style="width:120px">
+      <input id="newExp" type="number" placeholder="Expense" class="small" style="width:120px">
+      <select id="newMode" class="small">
+        <option>Cash</option>
+        <option>PhonePe</option>
+        <option>GooglePay</option>
+        <option>Bank Transfer</option>
+      </select>
+      <button class="btn btn-primary" onclick="addPayment()">Add Payment</button>
+    </div>
+  </div>
+
+  <!-- FILES + NOTES -->
+  <div class="card">
+    <h3 style="margin-top:0">Customer Documents</h3>
+
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <select id="uploadCategory" class="small">
+        <option>Aadhar</option>
+        <option>PAN</option>
+        <option>Bills</option>
+        <option>Receipts</option>
+        <option>Others</option>
+      </select>
+
+      <input id="fileInput" type="file" style="display:none" onchange="handleFileSelect(this.files)">
+      <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">Upload File</button>
+    </div>
+
+    <div id="filesArea"></div>
+
+    <div style="margin-top:20px">
+      <div class="label">Notes / Remarks</div>
+      <textarea id="notes" style="width:100%;height:80px;border-radius:8px;border:1px solid var(--soft-border);padding:8px"></textarea>
+      <button class="btn btn-primary" style="margin-top:10px" onclick="saveNotes()">Save Notes</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ================ CONFIG ================= */
+
+const API = "https://nsgd-backend.onrender.com";
+
+const UID = new URLSearchParams(location.search).get("uid");
+let entry = null;
+
+function authHeader() {
+  let t = localStorage.getItem("token");
+  if (!t.startsWith("Bearer ")) t = "Bearer " + t;
+  return {
+    "Authorization": t,
+    "Content-Type": "application/json"
+  };
+}
+
+
+function todayStr(){
+  const d=new Date();
+  return String(d.getDate()).padStart(2,'0')+"/"+String(d.getMonth()+1).padStart(2,'0')+"/"+d.getFullYear();
+}
+
+/* ================ LOAD PROFILE ================= */
+
+function loadProfile(){
+  fetch(`${API}/api/get-entries`, {headers:authHeader()})
+  .then(r=>r.json())
+  .then(list=>{
+    entry = list.find(e=>e.uniqueID===UID);
+    if(!entry){ alert("Not found"); return; }
+
+    document.getElementById("custName").innerText = entry.name || "-";
+    document.getElementById("custPhone").innerText = entry.contact || "-";
+    document.getElementById("agentName").innerText = entry.agent || "-";
+    document.getElementById("agentPhone").innerText = entry.agentPhone || "-";
+
+    const payments = entry.payments || [];
+    const amt = entry.amount || 0;
+    const paid = payments.reduce((s,p)=>s+(p.paid||0),0);
+    const exp = payments.reduce((s,p)=>s+(p.expenditure||0),0);
+
+    document.getElementById("sumAmount").innerText = "₹"+amt;
+    document.getElementById("sumPaid").innerText = "₹"+paid;
+    document.getElementById("sumDue").innerText = "₹"+(amt-paid);
+    document.getElementById("sumExp").innerText = "₹"+exp;
+
+    renderPayments();
+  });
+}
+
+function renderPayments(){
+  const body=document.getElementById("payBody");
+  body.innerHTML="";
+
+  (entry.payments||[]).forEach((p,i)=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML=`
+      <td>${p.date}</td>
+      <td>₹${p.paid}</td>
+      <td>₹${p.expenditure}</td>
+      <td>${p.mode||"Cash"}</td>
+      <td>
+        <button class="small" onclick="editPayment(${i})">✏️</button>
+        <button class="small" onclick="deletePayment(${i})">🗑️</button>
+      </td>
+    `;
+    body.appendChild(tr);
+  });
+}
+
+/* ================ PAYMENT ACTIONS ================= */
+
+function addPayment(){
+  const d=document.getElementById("newDate").value || todayStr();
+  const paid=Number(document.getElementById("newPaid").value||0);
+  const exp=Number(document.getElementById("newExp").value||0);
+  const mode=document.getElementById("newMode").value;
+
+  entry.payments.push({date:d,paid,expenditure:exp,mode});
+  savePayments();
+}
+
+function editPayment(i){
+  const p=entry.payments[i];
+
+  const d=prompt("Date",p.date)||p.date;
+  const paid=Number(prompt("Paid",p.paid)||0);
+  const exp=Number(prompt("Expense",p.expenditure)||0);
+  const mode=prompt("Mode (Cash/PhonePe/GPay/Bank)", p.mode || "Cash");
+
+  entry.payments[i]={date:d,paid,expenditure:exp,mode};
+  savePayments();
+}
+
+function deletePayment(i){
+  if(!confirm("Delete payment?"))return;
+  entry.payments.splice(i,1);
+  savePayments();
+}
+
+function savePayments(){
+  fetch(`${API}/api/update-history`,{
+    method:"POST",
+    headers:authHeader(),
+    body:JSON.stringify({uniqueID:UID,payments:entry.payments})
+  })
+  .then(r=>r.json())
+  .then(x=>{
+    if(!x.success) return alert("Failed");
+    entry=x.entry;
+    loadProfile();
+  });
+}
+
+/* ================ NOTES ================= */
+
+function saveNotes(){
+  entry.notes=document.getElementById("notes").value;
+
+  fetch(`${API}/api/update-customer`,{
+    method:"POST",
+    headers:authHeader(),
+    body:JSON.stringify(entry)
+  })
+  .then(r=>r.json())
+  .then(x=>{
+    alert(x.success?"Saved!":"Failed");
+  });
+}
+
+/* ================ INIT ================= */
+
+loadProfile();
+
+</script>
+</body>
+</html>

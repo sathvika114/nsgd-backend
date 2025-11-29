@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Analysis — NSGD.acx</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <style>
+    :root{
+      --sidebar:#04192b;
+      --sidebar-contrast:#08243a;
+      --bg:#f4f6fb;
+      --card:#ffffff;
+      --muted:#6b7280;
+      --primary:#2563eb;
+      --soft-border: rgba(230,238,248,0.9);
+      --shadow: 0 12px 30px rgba(15,23,42,0.08);
+      --radius:14px;
+    }
+    *{box-sizing:border-box;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;}
+    html,body{height:100%;margin:0;background:var(--bg);color:#0f1724}
+
+    /* layout */
+    .layout{display:flex;min-height:100vh}
+    .sidebar{
+      width:230px;
+      background:linear-gradient(180deg,var(--sidebar),var(--sidebar-contrast));
+      color:#e6eef9;
+      padding:20px 16px;
+      position:fixed;top:0;left:0;bottom:0;display:flex;flex-direction:column;justify-content:space-between;
+    }
+    .brand{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+    .brand img{width:44px;height:44px;border-radius:8px;object-fit:cover;background:#fff;padding:4px}
+    .brand .name{font-weight:700;font-size:16px}
+    .nav{margin-top:10px;flex:1}
+    .nav-label{color:rgba(255,255,255,0.18);font-size:11px;letter-spacing:0.08em;margin:8px 6px}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:10px;border-radius:12px;color:#eaf2ff;text-decoration:none;margin:6px 4px;transition:all .15s ease}
+    .nav-item.active{background:linear-gradient(90deg,#1f55c6,#0e3a6a);box-shadow:0 6px 18px rgba(20,45,90,0.12)}
+    .sidebar-footer{font-size:12px;color:rgba(255,255,255,0.35);border-top:1px solid rgba(255,255,255,0.03);padding-top:14px}
+
+    .main{margin-left:230px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+    .topbar{height:72px;background:transparent;display:flex;align-items:center;padding:20px 28px;border-bottom:1px solid rgba(15,23,42,0.03)}
+    .top-title{font-size:20px;font-weight:700}
+    .top-sub{color:var(--muted);font-size:13px;margin-top:4px}
+    .content{padding:22px 28px 40px;flex:1}
+
+    /* KPI boxes 4 across */
+    .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:18px}
+    .kpi{
+      background:linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.88));
+      border-radius:var(--radius);padding:16px;border:1px solid var(--soft-border);
+      box-shadow:var(--shadow);backdrop-filter: blur(6px);
+      min-height:78px;display:flex;flex-direction:column;justify-content:center;
+    }
+    .kpi .label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em}
+    .kpi .value{font-weight:800;font-size:20px;margin-top:6px}
+
+    /* charts grid: 2 columns */
+    .charts-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+    .chart-card{
+      background:linear-gradient(180deg,#fff,#fff);
+      border-radius:var(--radius);padding:16px;border:1px solid var(--soft-border);
+      box-shadow:var(--shadow);min-height:300px;display:flex;flex-direction:column;
+    }
+    .chart-title{font-weight:700;margin-bottom:10px}
+    .chart-wrap{flex:1;position:relative;min-height:200px}
+    .chart-wrap canvas{width:100% !important;height:100% !important;display:block}
+
+    /* summary card */
+    .summary-card{margin-top:18px;background:linear-gradient(180deg,#fff,#fff);border-radius:var(--radius);padding:16px;border:1px solid var(--soft-border);box-shadow:var(--shadow)}
+    .mini-table{width:100%;border-collapse:collapse}
+    .mini-table th{font-size:12px;color:var(--muted);text-transform:uppercase;padding:10px 8px;text-align:left;border-bottom:1px solid rgba(15,23,42,0.04)}
+    .mini-table td{padding:10px 8px;border-bottom:1px solid rgba(15,23,42,0.03)}
+
+    @media (max-width:1000px){
+      .kpi-row{grid-template-columns:repeat(2,1fr)}
+      .charts-grid{grid-template-columns:1fr}
+    }
+    @media (max-width:640px){
+      .kpi-row{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <!-- SIDEBAR (same as entry) -->
+    <aside class="sidebar" role="navigation" aria-label="Main navigation">
+      <div>
+        <div class="brand">
+          <img src="/assets/logo.png" alt="logo" onerror="this.style.display='none'">
+          <div class="name">NSGD.acx</div>
+        </div>
+
+        <nav class="nav" aria-label="Primary">
+          <div class="nav-label">Main</div>
+          <a href="dashboard.html" class="nav-item"><span>🏠</span> Dashboard</a>
+          <a href="entry.html" class="nav-item"><span>➕</span> Add Entry</a>
+          <a href="ledger.html" class="nav-item"><span>📒</span> Ledger</a>
+          <a href="expenses.html" class="nav-item"><span>💰</span> Personal Expenses</a>
+          <a href="analysis.html" class="nav-item active" aria-current="page"><span>📊</span> Analytics</a>
+        </nav>
+      </div>
+
+      <div class="sidebar-footer">NSGD.acx • Internal Tool</div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main" role="main">
+      <header class="topbar">
+        <div>
+          <div class="top-title">Analytics</div>
+          <div class="top-sub">Sales, payments & expenses — visual summary</div>
+        </div>
+      </header>
+
+      <div class="content">
+        <!-- KPI row -->
+        <div class="kpi-row" role="region" aria-label="Key metrics">
+          <div class="kpi">
+            <div class="label">Total Sales</div>
+            <div class="value" id="k_totalSales">₹0</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Total Paid</div>
+            <div class="value" id="k_totalPaid">₹0</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Total Due</div>
+            <div class="value" id="k_totalDue">₹0</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Total Expense</div>
+            <div class="value" id="k_totalExp">₹0</div>
+          </div>
+        </div>
+
+        <!-- Charts 2x2 (row1 + row2) -->
+        <div class="charts-grid" role="region" aria-label="Charts row 1">
+          <div class="chart-card" aria-label="Yearly sales">
+            <div class="chart-title">Yearly Sales (Jan–Dec)</div>
+            <div class="chart-wrap"><canvas id="chartYearSales"></canvas></div>
+          </div>
+
+          <div class="chart-card" aria-label="Yearly expenses">
+            <div class="chart-title">Yearly Expenses (Jan–Dec)</div>
+            <div class="chart-wrap"><canvas id="chartYearExpenses"></canvas></div>
+          </div>
+        </div>
+
+        <div style="height:18px"></div>
+
+        <div class="charts-grid" role="region" aria-label="Charts row 2">
+          <div class="chart-card" aria-label="Last 14 days">
+            <div class="chart-title">Last 14 Days Trend</div>
+            <div class="chart-wrap"><canvas id="chart14Days"></canvas></div>
+          </div>
+
+          <div class="chart-card" aria-label="This month daily sales">
+            <div class="chart-title">This Month — Daily Sales</div>
+            <div class="chart-wrap"><canvas id="chartThisMonth"></canvas></div>
+          </div>
+        </div>
+
+        <!-- Summary table -->
+        <div class="summary-card" role="region" aria-label="Quick summary">
+          <div style="font-weight:700;margin-bottom:8px">Quick Summary (Last 30 Days)</div>
+          <table class="mini-table" aria-hidden="false">
+            <thead>
+              <tr><th style="width:70%">Metric</th><th>Value</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Average Daily Sale</td><td id="q_avgSale">₹0</td></tr>
+              <tr><td>Average Daily Expense</td><td id="q_avgExp">₹0</td></tr>
+              <tr><td>Net Profit (30 days)</td><td id="q_netProfit">₹0</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+<script>
+/* ===========================
+   CONFIG
+=========================== */
+const API = "https://nsgd-backend.onrender.com";
+
+
+function authHeader() {
+  let t = localStorage.getItem("token") || "";
+  // handle token formats: raw or "Bearer x"
+  if (t && !t.toLowerCase().startsWith("bearer ")) t = "Bearer " + t;
+  return {
+    "Authorization": t,
+    "Accept": "application/json"
+  };
+}
+
+/* ===========================
+   Helpers
+=========================== */
+function fmt(n){ return "₹" + Number(n || 0).toLocaleString(); }
+function zeros(len){ return Array.from({length:len}).map(()=>0); }
+
+// parse many date formats: dd/mm/yyyy or ISO
+function parseDateSafe(s){
+  if(!s) return null;
+  if(typeof s !== "string") return new Date(s);
+  if(s.includes("/")){
+    const parts = s.split('/');
+    // dd/mm/yyyy
+    const d = Number(parts[0]), m = Number(parts[1]) - 1, y = Number(parts[2]);
+    return new Date(y, m, d);
+  }
+  const d = new Date(s);
+  return isNaN(d) ? null : d;
+}
+
+/* ===========================
+   Chart placeholders
+=========================== */
+let chartYearSales, chartYearExpenses, chart14Days, chartThisMonth;
+
+const chartOpts = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: { legend: { position: 'top' }, tooltip:{mode:'index',intersect:false} },
+  scales: { x:{grid:{display:false}}, y:{grid:{color:'rgba(15,23,42,0.04)'}, beginAtZero:true} }
+};
+
+function initCharts(){
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+  const ctxA = document.getElementById("chartYearSales").getContext("2d");
+  chartYearSales = new Chart(ctxA, {
+    type: 'bar',
+    data: { labels: months, datasets: [{ label: 'Sales', data: zeros(12), backgroundColor: 'rgba(37,99,235,0.18)', borderColor: 'rgba(37,99,235,0.9)', borderWidth:1 }]},
+    options: chartOpts
+  });
+
+  const ctxB = document.getElementById("chartYearExpenses").getContext("2d");
+  chartYearExpenses = new Chart(ctxB, {
+    type: 'bar',
+    data: { labels: months, datasets: [{ label: 'Expenses', data: zeros(12), backgroundColor: 'rgba(212,63,63,0.12)', borderColor: 'rgba(212,63,63,0.9)', borderWidth:1 }]},
+    options: chartOpts
+  });
+
+  const ctxC = document.getElementById("chart14Days").getContext("2d");
+  chart14Days = new Chart(ctxC, {
+    type: 'line',
+    data: { labels: [], datasets: [
+      { label: 'Paid', data: [], borderColor: '#2563eb', tension:0.3, fill:true, backgroundColor:'rgba(37,99,235,0.06)' },
+      { label: 'Expense', data: [], borderColor:'#d43f3f', tension:0.3, fill:true, backgroundColor:'rgba(212,63,63,0.04)' }
+    ]},
+    options: chartOpts
+  });
+
+  const ctxD = document.getElementById("chartThisMonth").getContext("2d");
+  chartThisMonth = new Chart(ctxD, {
+    type: 'bar',
+    data: { labels: [], datasets: [{ label: 'Daily Sales', data: [], backgroundColor: 'rgba(14,164,90,0.16)', borderColor:'rgba(14,164,90,0.9)', borderWidth:1 }]},
+    options: chartOpts
+  });
+}
+
+/* ===========================
+   Fetch data
+=========================== */
+async function fetchEntries(){
+  try {
+    const r = await fetch(`${API}/api/get-entries`, { headers: authHeader() });
+    if (!r.ok) return [];
+    const json = await r.json();
+    return Array.isArray(json) ? json : [];
+  } catch(e){ console.error("fetchEntries:", e); return []; }
+}
+
+async function fetchExpenses(){
+  try {
+    const r = await fetch(`${API}/api/get-expenses`, { headers: authHeader() });
+    if(!r.ok) return [];
+    const json = await r.json();
+    return Array.isArray(json) ? json : [];
+  } catch(e){ return []; }
+}
+
+/* ===========================
+   Build and render analytics
+=========================== */
+async function renderAnalytics(){
+  const entries = await fetchEntries();
+  const expenses = await fetchExpenses();
+
+  // KPIs
+  let totalSales=0, totalPaid=0, totalDue=0, totalExp=0;
+  entries.forEach(e=>{
+    const amt = Number(e.amount||0);
+    const paid = Number(e.paid || (Array.isArray(e.payments)? e.payments.reduce((s,p)=>s+Number(p.paid||0),0):0));
+    const exp = Number(e.expenditure || (Array.isArray(e.payments)? e.payments.reduce((s,p)=>s+Number(p.expenditure||0),0):0));
+    totalSales += amt;
+    totalPaid += paid;
+    totalExp += exp;
+    totalDue += (amt - paid);
+  });
+  // include separate expense records
+  (expenses || []).forEach(x => totalExp += Number(x.amount||0));
+
+  document.getElementById("k_totalSales").innerText = fmt(totalSales);
+  document.getElementById("k_totalPaid").innerText = fmt(totalPaid);
+  document.getElementById("k_totalDue").innerText = fmt(totalDue);
+  document.getElementById("k_totalExp").innerText = fmt(totalExp);
+
+  // Yearly buckets
+  const salesByMonth = zeros(12);
+  const expByMonth = zeros(12);
+  entries.forEach(e=>{
+    const d = parseDateSafe(e.date || e.createdAt || null) || parseDateSafe(e.payments?.[0]?.date);
+    if(!d) return;
+    const m = d.getMonth();
+    salesByMonth[m] += Number(e.amount || 0);
+    expByMonth[m] += Number(e.expenditure || 0);
+  });
+  (expenses || []).forEach(x=>{
+    const d = parseDateSafe(x.date || x.createdAt);
+    if(!d) return;
+    expByMonth[d.getMonth()] += Number(x.amount || 0);
+  });
+
+  chartYearSales.data.datasets[0].data = salesByMonth;
+  chartYearSales.update();
+  chartYearExpenses.data.datasets[0].data = expByMonth;
+  chartYearExpenses.update();
+
+  // last 14 days
+  const days = [];
+  for(let i=13;i>=0;i--){
+    const d = new Date(); d.setDate(d.getDate()-i);
+    days.push(d.toLocaleDateString());
+  }
+  const sales14 = zeros(14);
+  const exp14 = zeros(14);
+
+  entries.forEach(e=>{
+    const d = parseDateSafe(e.date || e.createdAt) || parseDateSafe(e.payments?.[0]?.date);
+    if(!d) return;
+    const idx = days.indexOf(d.toLocaleDateString());
+    if(idx >= 0){
+      sales14[idx] += Number(e.paid || (Array.isArray(e.payments)? e.payments.reduce((s,p)=>s+Number(p.paid||0),0):0));
+      exp14[idx] += Number(e.expenditure || (Array.isArray(e.payments)? e.payments.reduce((s,p)=>s+Number(p.expenditure||0),0):0));
+    }
+  });
+  (expenses || []).forEach(x=>{
+    const d = parseDateSafe(x.date || x.createdAt);
+    if(!d) return;
+    const idx = days.indexOf(d.toLocaleDateString());
+    if(idx >= 0) exp14[idx] += Number(x.amount||0);
+  });
+
+  chart14Days.data.labels = days;
+  chart14Days.data.datasets[0].data = sales14;
+  chart14Days.data.datasets[1].data = exp14;
+  chart14Days.update();
+
+  // this month daily sales
+  const now = new Date();
+  const y = now.getFullYear(), mth = now.getMonth();
+  const daysInMonth = new Date(y, mth+1, 0).getDate();
+  const monthLabels = Array.from({length:daysInMonth}, (_,i)=> String(i+1));
+  const salesMonth = zeros(daysInMonth);
+  entries.forEach(e=>{
+    const d = parseDateSafe(e.date || e.createdAt) || parseDateSafe(e.payments?.[0]?.date);
+    if(!d) return;
+    if(d.getFullYear()===y && d.getMonth()===mth){
+      const idx = d.getDate()-1;
+      salesMonth[idx] += Number(e.paid || (Array.isArray(e.payments)? e.payments.reduce((s,p)=>s+Number(p.paid||0),0):0));
+    }
+  });
+  chartThisMonth.data.labels = monthLabels;
+  chartThisMonth.data.datasets[0].data = salesMonth;
+  chartThisMonth.update();
+
+  // Quick 30-day summary
+  const last30 = [];
+  for(let i=29;i>=0;i--){
+    const d = new Date(); d.setDate(d.getDate()-i);
+    last30.push(d.toLocaleDateString());
+  }
+  let total30Sales=0, total30Exp=0;
+  entries.forEach(e=>{
+    const d = parseDateSafe(e.date || e.createdAt) || parseDateSafe(e.payments?.[0]?.date);
+    if(!d) return;
+    if(last30.indexOf(d.toLocaleDateString()) >= 0){
+      total30Sales += Number(e.paid || (Array.isArray(e.payments)? e.payments.reduce((s,p)=>s+Number(p.paid||0),0):0));
+      total30Exp += Number(e.expenditure || (Array.isArray(e.payments)? e.payments.reduce((s,p)=>s+Number(p.expenditure||0),0):0));
+    }
+  });
+  (expenses || []).forEach(x=>{
+    const d = parseDateSafe(x.date || x.createdAt);
+    if(!d) return;
+    if(last30.indexOf(d.toLocaleDateString()) >= 0) total30Exp += Number(x.amount||0);
+  });
+
+  const avgSale = Math.round(total30Sales/30 || 0);
+  const avgExp = Math.round(total30Exp/30 || 0);
+  const net = total30Sales - total30Exp;
+
+  document.getElementById("q_avgSale").innerText = fmt(avgSale);
+  document.getElementById("q_avgExp").innerText = fmt(avgExp);
+  document.getElementById("q_netProfit").innerText = fmt(net);
+}
+
+/* ===========================
+   Init
+=========================== */
+(async function init(){
+  // Require token, redirect to login if absent
+  const token = localStorage.getItem("token");
+  if(!token){
+    // user not authenticated — send to login
+    window.location.href = "login.html";
+    return;
+  }
+
+  initCharts();
+  await renderAnalytics();
+
+  // optionally refresh every 2 minutes
+  // setInterval(renderAnalytics, 120000);
+})();
+</script>
+</body>
+</html>

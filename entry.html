@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Add Entry — NSGD.acx</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root{
+      --sidebar:#04192b;
+      --sidebar-contrast:#08243a;
+      --bg:#f4f6fb;
+      --card:#ffffff;
+      --muted:#6b7280;
+      --primary:#2563eb;
+      --glass: rgba(255,255,255,0.78);
+      --soft-border: rgba(230,238,248,0.9);
+      --shadow: 0 12px 30px rgba(15,23,42,0.08);
+      --radius:14px;
+      --accent:#0ea45a;
+      --danger:#d43f3f;
+    }
+
+    *{box-sizing:border-box;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;}
+    html,body{height:100%;margin:0;background:var(--bg);color:#0f1724}
+
+    .layout{display:flex;min-height:100vh}
+    .sidebar{
+      width:230px;
+      background:linear-gradient(180deg,var(--sidebar),var(--sidebar-contrast));
+      color:#e6eef9;
+      padding:20px 16px;
+      position:fixed;top:0;left:0;bottom:0;display:flex;flex-direction:column;justify-content:space-between;
+    }
+
+    .brand{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+    .brand img{width:44px;height:44px;border-radius:8px;object-fit:cover;background:#fff;padding:4px}
+    .brand .name{font-weight:700;font-size:16px}
+
+    .nav{margin-top:10px;flex:1}
+    .nav-label{color:rgba(255,255,255,0.18);font-size:11px;letter-spacing:0.08em;margin:8px 6px}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:10px;border-radius:12px;color:#eaf2ff;text-decoration:none;margin:6px 4px;transition:all .15s ease}
+    .nav-item.active{background:linear-gradient(90deg,#1f55c6,#0e3a6a);box-shadow:0 6px 18px rgba(20,45,90,0.12)}
+
+    .main{margin-left:230px;flex:1;display:flex;flex-direction:column}
+    .topbar{height:72px;background:transparent;display:flex;align-items:center;padding:20px 28px;border-bottom:1px solid rgba(15,23,42,0.03)}
+    .top-title{font-size:20px;font-weight:700}
+    .top-sub{color:var(--muted);font-size:13px;margin-top:4px}
+
+    .content{padding:22px 28px 40px;flex:1}
+
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+    .card{
+      background:var(--card);
+      padding:18px;
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      border:1px solid var(--soft-border);
+    }
+
+    h3{margin:0 0 12px 0;font-size:16px;color:#0f1724;font-weight:700}
+    label{display:block;margin-bottom:6px;font-size:13px;font-weight:600}
+    input,select{
+      width:100%;
+      padding:10px;
+      border-radius:10px;
+      border:1px solid rgba(15,23,42,0.06);
+      font-size:14px;
+    }
+
+    .row{display:flex;gap:12px}
+    .flex1{flex:1}
+
+    .save-wrap{display:flex;justify-content:flex-end;margin-top:18px}
+    .btn{padding:10px 16px;border-radius:20px;font-weight:600;cursor:pointer}
+    .btn.primary{background:#2563eb;color:white;border:0}
+    .btn.ghost{background:#fff;border:1px solid rgba(15,23,42,0.08)}
+  </style>
+</head>
+
+<body>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div>
+      <div class="brand">
+        <img src="assets/logo.png">
+        <div class="name">NSGD.acx</div>
+      </div>
+
+      <nav class="nav">
+        <div class="nav-label">Main</div>
+        <a class="nav-item" href="dashboard.html">🏠 Dashboard</a>
+        <a class="nav-item active" href="entry.html">➕ Add Entry</a>
+        <a class="nav-item" href="ledger.html">📒 Ledger</a>
+        <a class="nav-item" href="expenses.html">💰 Personal Expenses</a>
+        <a class="nav-item" href="analysis.html">📊 Analytics</a>
+      </nav>
+
+      <div class="nav-label">Account</div>
+      <a class="nav-item" href="login.html">🚪 Logout</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <div class="top-title">Add / Edit Entry</div>
+        <div class="top-sub">Manage customer ledger and agent details</div>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="grid">
+        
+        <!-- Entry Info -->
+        <div class="card">
+          <h3>Entry Info</h3>
+          <label>Date (DD/MM/YYYY)</label>
+          <input id="date">
+          <label>Unique ID</label>
+          <input id="uniqueID" disabled>
+        </div>
+
+        <!-- Customer -->
+        <div class="card">
+          <h3>Customer Details</h3>
+          <label>Customer Name</label>
+          <input id="name">
+          <label>Customer Contact</label>
+          <input id="contact">
+        </div>
+
+        <!-- Agent -->
+        <div class="card">
+          <h3>Agent Details</h3>
+          <label>Agent Name</label>
+          <input id="agent">
+          <label>Agent Contact</label>
+          <input id="agentPhone">
+        </div>
+
+      </div>
+
+      <div class="card" style="margin-top:20px">
+        <h3>Financial Details</h3>
+
+        <div class="row">
+          <div class="flex1">
+            <label>Total Amount</label>
+            <input id="amount" type="number" oninput="calc()">
+          </div>
+
+          <div class="flex1">
+            <label>Paid Now</label>
+            <input id="paid" type="number" oninput="calc()">
+          </div>
+
+          <div class="flex1">
+            <label>Payment Mode</label>
+            <select id="paymentMode">
+              <option>Cash</option>
+              <option>PhonePe</option>
+              <option>GooglePay</option>
+              <option>Bank Transfer</option>
+            </select>
+          </div>
+
+          <div class="flex1">
+            <label>Expenditure</label>
+            <input id="expenditure" type="number" oninput="calc()">
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:12px">
+          <div class="flex1">
+            <label>Remaining Due</label>
+            <input id="due" disabled>
+          </div>
+          <div class="flex1">
+            <label>Profit (Paid - Expense)</label>
+            <input id="balance" disabled>
+          </div>
+        </div>
+
+        <div class="save-wrap">
+          <button class="btn ghost" onclick="history.back()">← Back</button>
+          <button class="btn primary" onclick="save()">Save Entry</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  const API = "https://nsgd-backend.onrender.com";
+
+
+  function authHeader(){
+    let t = localStorage.getItem("token");
+    if(!t.startsWith("Bearer ")) t = "Bearer " + t;
+    return { "Authorization": t, "Content-Type": "application/json" };
+  }
+
+  function getSafe(id){
+    const el = document.getElementById(id);
+    return el ? el.value.trim() : "";
+  }
+
+  const params = new URLSearchParams(location.search);
+  const uid = params.get("uid");
+  let originalEntry = null;
+  let basePaid = 0, baseExp = 0;
+
+  function todayStr(){
+    const d = new Date();
+    return String(d.getDate()).padStart(2,'0')+"/"+String(d.getMonth()+1).padStart(2,'0')+"/"+d.getFullYear();
+  }
+
+  function genUID(){
+    return "NSGD-" + Math.floor(10000 + Math.random()*90000);
+  }
+
+  function initForm(){
+    if(uid){
+      fetch(`${API}/api/get-entries`,{headers:authHeader()})
+      .then(r=>r.json())
+      .then(list=>{
+        const e = list.find(x=>x.uniqueID===uid);
+        if(!e){ alert("Entry not found"); return; }
+
+        originalEntry = e;
+        basePaid = e.paid || 0;
+        baseExp = e.expenditure || 0;
+
+        date.value = e.date;
+        uniqueID.value = e.uniqueID;
+
+        name.value = e.name;
+        contact.value = e.contact;
+        agent.value = e.agent;
+        agentPhone.value = e.agentPhone;
+
+        amount.value = e.amount;
+        due.value = e.due;
+        balance.value = e.balance;
+      });
+    } else {
+      date.value = todayStr();
+      uniqueID.value = genUID();
+    }
+  }
+
+  function calc(){
+    const amt = Number(amount.value)||0;
+    const paidNow = Number(paid.value)||0;
+    const expNow = Number(expenditure.value)||0;
+
+    const tPaid = basePaid + paidNow;
+    const tExp = baseExp + expNow;
+
+    due.value = amt - tPaid;
+    balance.value = tPaid - tExp;
+  }
+
+  function save(){
+    const entry = {
+      uniqueID: uniqueID.value,
+      date: date.value || todayStr(),
+      name: getSafe("name"),
+      contact: getSafe("contact"),
+      agent: getSafe("agent"),
+      agentPhone: getSafe("agentPhone"),
+      amount: Number(amount.value)||0,
+      payments: []
+    };
+
+    const paidNow = Number(paid.value)||0;
+    const expNow = Number(expenditure.value)||0;
+
+    if(originalEntry && originalEntry.payments){
+      entry.payments = [...originalEntry.payments];
+    }
+
+    if(paidNow>0 || expNow>0){
+      entry.payments.push({
+        date: entry.date,
+        paid: paidNow,
+        expenditure: expNow,
+        mode: paymentMode.value
+      });
+    }
+
+    fetch(`${API}/api/save-entry`,{
+      method:"POST",
+      headers:authHeader(),
+      body:JSON.stringify(entry)
+    })
+    .then(r=>r.json())
+    .then(res=>{
+      if(res.success){
+        alert("Saved successfully!");
+        location.href="ledger.html";
+      } else {
+        alert("Save failed");
+      }
+    })
+    .catch(err=>{
+      alert("Server error");
+      console.error(err);
+    });
+  }
+
+  initForm();
+</script>
+
+</body>
+</html>
